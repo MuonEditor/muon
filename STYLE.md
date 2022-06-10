@@ -1,7 +1,3 @@
-# Pull Requests
-
-TODO
-
 # Code Style
 
 ## Naming Convention
