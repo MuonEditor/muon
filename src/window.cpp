@@ -59,7 +59,7 @@ namespace muon {
     void Window::setupSDL(std::string title) {
         if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_GAMECONTROLLER) != 0) {
             spdlog::error("[SDL] {0}", SDL_GetError());
-            throw std::exception("Failed to initialize SDL2");
+            throw std::runtime_error("Failed to initialize SDL2");
         }
 
         // Decide GL+GLSL versions

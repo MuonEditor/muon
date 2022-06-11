@@ -5,6 +5,9 @@
 #else
 #include <SDL2/SDL_opengl.h>
 #endif
+#ifdef __linux__
+#include <GL/gl.h>
+#endif
 #include <string>
 
 namespace muon {

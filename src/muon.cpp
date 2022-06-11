@@ -10,7 +10,7 @@ namespace muon {
     Muon::Muon(int argc, char** argv) {
         // Command line arguments
         args.define('h', "help", "Show help");
-        if (args.parse(argc, argv)) { throw std::exception("Failed to parse arguments"); }
+        if (args.parse(argc, argv)) { throw std::runtime_error("Failed to parse arguments"); }
 
         // MOTD
         spdlog::info("- Muon Editor v" MUON_VERSION " -");
