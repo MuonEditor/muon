@@ -22,6 +22,13 @@ else()
     endif()
 endif()
 
+# "Universal" libraries
+set(THREADS_PREFER_PTHREAD_FLAD ON)
+find_package(Threads REQUIRED)
+
+set(OpenGL_GL_PREFERENCE GLVND)
+find_package(OpenGL REQUIRED)
+
 # Libraries
 if (WIN32)
     # cmake .. "-DCMAKE_TOOLCHAIN_FILE=C:/dev/vcpkg/scripts/buildsystems/vcpkg.cmake"
@@ -46,5 +53,6 @@ else()
 
     target_link_libraries(muon PRIVATE
         ${SDL2_LIBRARIES}
+        OpenGL::GL
     )
 endif()
