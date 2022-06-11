@@ -43,7 +43,7 @@ namespace muon {
 
     bool Window::newFrame() {
         SDL_Event event;
-        while (SDL_PollEvent(&event)) {
+        if (SDL_WaitEvent(&event) != 0) {
             ImGui_ImplSDL2_ProcessEvent(&event);
             if (event.type == SDL_QUIT) return true;
             else if (event.type == SDL_WINDOWEVENT && event.window.event == SDL_WINDOWEVENT_CLOSE && event.window.windowID == SDL_GetWindowID(window)) {
