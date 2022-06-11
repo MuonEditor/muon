@@ -32,27 +32,26 @@ find_package(OpenGL REQUIRED)
 # Libraries
 if (WIN32)
     # cmake .. "-DCMAKE_TOOLCHAIN_FILE=C:/dev/vcpkg/scripts/buildsystems/vcpkg.cmake"
-    find_package(SDL2 CONFIG REQUIRED)
-    target_link_libraries(muon PRIVATE SDL2::SDL2 SDL2::SDL2main)
+    find_package(glfw3 CONFIG REQUIRED)
+    target_link_libraries(muon PUBLIC glfw)
 
     # OpenGL
-    find_package(OpenGL REQUIRED)
     target_link_libraries(muon PRIVATE OpenGL::GL)
 else()
     find_package(PkgConfig)
 
-    pkg_check_modules(SDL2 REQUIRED sdl2)
+    pkg_check_modules(GLFW3 REQUIRED glfw3)
 
     target_include_directories(muon PRIVATE
-        ${SDL2_INCLUDE_DIRS}
+        ${GLFW3_INCLUDE_DIRS}
     )
 
     target_link_directories(muon PRIVATE
-        ${SDL2_LIBRARY_DIRS}
+        ${GLFW3_LIBRARY_DIRS}
     )
 
     target_link_libraries(muon PRIVATE
-        ${SDL2_LIBRARIES}
+        ${GLFW3_LIBRARIES}
         OpenGL::GL
     )
 endif()

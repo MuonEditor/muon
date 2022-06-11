@@ -2,9 +2,6 @@
 #include "spdlog/spdlog.h"
 #include "version.h"
 #include "imgui.h"
-#include "imgui_impl_opengl3.h"
-#include "imgui_impl_sdl.h"
-#include <SDL2/SDL.h>
 
 namespace muon {
     Muon::Muon(int argc, char** argv) {

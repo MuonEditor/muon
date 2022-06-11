@@ -1,14 +1,19 @@
 #pragma once
-#include <SDL2/SDL.h>
-#if defined(IMGUI_IMPL_OPENGL_ES2)
-#include <SDL2/SDL_opengles2.h>
+#include <string>
+#include <GLFW/glfw3.h>
+
+// Include OpenGL
+#if defined(_WIN32)
+#include <windows.h>
+#include <GL/gl.h>
+#elif defined(__APPLE__)
+#include <OpenGL/gl.h>
+#elif defined(__ANDROID__)
+#include <EGL/egl.h>
+#include <GLES3/gl3.h>
 #else
-#include <SDL2/SDL_opengl.h>
-#endif
-#ifdef __linux__
 #include <GL/gl.h>
 #endif
-#include <string>
 
 #define WINDOW_FLAGS ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoDecoration
 
@@ -27,20 +32,19 @@ namespace muon {
 
         void getSize(int& w, int& h);
         void getPos(int& x, int& y);
-        SDL_Window* getSDLWindow() { return window; }
-        SDL_GLContext getGLContext() { return glContext; }
+        GLFWwindow* getGLFWWindow() { return window; }
 
     private:
-        void setupSDL(std::string title);
+        void setupGLFW(std::string title);
         void setupImGui();
         void shutdownImGui();
-        void shutdownSDL();
+        void shutdownGLFW();
+
+        static void glfwErrorCallback(int error, const char* description);
 
 
         int width, height;
-        SDL_Window* window;
-        SDL_GLContext glContext;
         const char* glslVersion;
-
+        GLFWwindow* window;
     };
 }
