@@ -22,9 +22,23 @@ namespace muon {
         SDL_SetWindowTitle(window, title.c_str());
     }
 
-    void Window::getWindowSize(int& w, int& h) {
+    void Window::setSize(int w, int h) {
+        width = w;
+        height = h;
+        SDL_SetWindowSize(window, width, height);
+    }
+
+    void Window::setPos(int x, int y) {
+        SDL_SetWindowPosition(window, x, y);
+    }
+
+    void Window::getSize(int& w, int& h) {
         w = width;
         h = height;
+    }
+
+    void Window::getPos(int& x, int& y) {
+        SDL_GetWindowPosition(window, &x, &y);
     }
 
     bool Window::newFrame() {
@@ -43,10 +57,15 @@ namespace muon {
         ImGui_ImplSDL2_NewFrame();
         ImGui::NewFrame();
 
+        ImGui::Begin("Main", NULL, WINDOW_FLAGS);
+        ImGui::SetWindowPos(ImVec2(0, 0));
+        ImGui::SetWindowSize(ImVec2(width, height));
+
         return false;
     }
 
     void Window::render() {
+        ImGui::End();
         ImGui::Render();
         auto io = ImGui::GetIO();
         glViewport(0, 0, (int)io.DisplaySize.x, (int)io.DisplaySize.y);

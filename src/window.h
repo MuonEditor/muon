@@ -10,6 +10,8 @@
 #endif
 #include <string>
 
+#define WINDOW_FLAGS ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoDecoration
+
 namespace muon {
     class Window {
     public:
@@ -20,8 +22,11 @@ namespace muon {
         void render();
 
         void setTitle(std::string title);
+        void setSize(int w, int h);
+        void setPos(int x, int y);
 
-        void getWindowSize(int& w, int& h);
+        void getSize(int& w, int& h);
+        void getPos(int& x, int& y);
         SDL_Window* getSDLWindow() { return window; }
         SDL_GLContext getGLContext() { return glContext; }
 

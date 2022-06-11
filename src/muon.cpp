@@ -20,12 +20,16 @@ namespace muon {
     }
 
     int Muon::run() {
+        bool demo = false;
+
         while (true) {
             if (win->newFrame()) { break; }
 
-            bool dummy = true;
-            ImGui::ShowDemoWindow(&dummy);
-
+            ImGui::Checkbox("ImGui Demo", &demo);
+            if (demo) {
+                ImGui::ShowDemoWindow();
+            }
+            
             win->render();
         }
 
