@@ -33,6 +33,7 @@ TextRenderer::TextRenderer()
     stbtt_InitFont(&font, buffer, 0);
 
     mGlyphScale = stbtt_ScaleForPixelHeight(&font, mSDFRes);
+    mGlyphScale = 1;
 
     if (font.numGlyphs == 0) throw std::runtime_error("Font file error");
 
@@ -111,7 +112,7 @@ void TextRenderer::putChar(char character, int x, int y, const glm::vec4& col) {
     glActiveTexture(GL_TEXTURE0);
     glBindVertexArray(mVAO);
 
-    FontChar* ch = &mFdata[65];
+    FontChar* ch = &mFdata[character];
 
     float xpos = x * mGlyphScale;
     float ypos = y * mGlyphScale;

@@ -29,12 +29,12 @@ int Muon::run() {
     while (true) {
         if (win->newFrame()) { break; }
 
-        ImGui::Checkbox("ImGui Demo", &demo);
-        if (demo) {
-            ImGui::ShowDemoWindow();
-        }
-        
-        textRenderer.putChar('H', 0, 0, {1.0f, 0.0f, 1.0f, 1.0f});
+        // ImGui::Checkbox("ImGui Demo", &demo);
+        // if (demo) {
+        //     ImGui::ShowDemoWindow();
+        // }
+
+        textRenderer.putChar('H', 0, 0, {1.0f, 1.0f, 1.0f, 1.0f});
 
         // check err
         GLenum err;
