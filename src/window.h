@@ -1,19 +1,8 @@
 #pragma once
-#include <string>
-#include <GLFW/glfw3.h>
 
-// Include OpenGL
-#if defined(_WIN32)
-#include <windows.h>
-#include <GL/gl.h>
-#elif defined(__APPLE__)
-#include <OpenGL/gl.h>
-#elif defined(__ANDROID__)
-#include <EGL/egl.h>
-#include <GLES3/gl3.h>
-#else
-#include <GL/gl.h>
-#endif
+#include <string>
+
+#include "gl.h"
 
 #define WINDOW_FLAGS ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoDecoration
 

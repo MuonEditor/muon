@@ -1,9 +1,7 @@
 #include "window.h"
-#include "imgui.h"
-#include "imgui_impl_opengl3.h"
-#include "imgui_impl_glfw.h"
+
 #include "spdlog/spdlog.h"
-#include <exception>
+#include "gl.h"
 
 namespace muon {
     Window::Window(std::string title, int width, int height) {
@@ -100,6 +98,7 @@ namespace muon {
         window = glfwCreateWindow(1280, 720, "Dear ImGui GLFW+OpenGL3 example", NULL, NULL);
         if (window == NULL) throw std::runtime_error("Could not create window");
         glfwMakeContextCurrent(window);
+        gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
         glfwSwapInterval(1); // Enable vsync
     }
 

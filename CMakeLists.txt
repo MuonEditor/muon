@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.13)
 project(muon)
 
-file(GLOB_RECURSE SRC "src/*.cpp")
+file(GLOB_RECURSE SRC "src/*.cpp" "src/*.c")
 
 add_executable(muon ${SRC})
 target_include_directories(muon PRIVATE "src/")
