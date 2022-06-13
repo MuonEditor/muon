@@ -7,33 +7,35 @@
 #define WINDOW_FLAGS ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoDecoration
 
 namespace muon {
-    class Window {
-    public:
-        Window(std::string title, int width, int height);
-        ~Window();
 
-        bool newFrame();
-        void render();
+class Window {
+public:
+    Window(std::string title, int width, int height);
+    ~Window();
 
-        void setTitle(std::string title);
-        void setSize(int w, int h);
-        void setPos(int x, int y);
+    bool newFrame();
+    void render();
 
-        void getSize(int& w, int& h);
-        void getPos(int& x, int& y);
-        GLFWwindow* getGLFWWindow() { return window; }
+    void setTitle(std::string title);
+    void setSize(int w, int h);
+    void setPos(int x, int y);
 
-    private:
-        void setupGLFW(std::string title);
-        void setupImGui();
-        void shutdownImGui();
-        void shutdownGLFW();
+    void getSize(int& w, int& h);
+    void getPos(int& x, int& y);
+    GLFWwindow* getGLFWWindow() { return window; }
 
-        static void glfwErrorCallback(int error, const char* description);
+private:
+    void setupGLFW(std::string title);
+    void setupImGui();
+    void shutdownImGui();
+    void shutdownGLFW();
+
+    static void glfwErrorCallback(int error, const char* description);
 
 
-        int width, height;
-        const char* glslVersion;
-        GLFWwindow* window;
-    };
+    int width, height;
+    const char* glslVersion;
+    GLFWwindow* window;
+};
+
 }

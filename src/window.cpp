@@ -3,130 +3,130 @@
 #include "spdlog/spdlog.h"
 #include "gl.h"
 
-namespace muon {
-    Window::Window(std::string title, int width, int height) {
-        this->width = width;
-        this->height = height;
-        setupGLFW(title);
-        setupImGui();
-    }
+using namespace muon;
 
-    Window::~Window() {
-        shutdownImGui();
-        shutdownGLFW();    
-    }
+Window::Window(std::string title, int width, int height) {
+    this->width = width;
+    this->height = height;
+    setupGLFW(title);
+    setupImGui();
+}
 
-    void Window::setTitle(std::string title) {
-        glfwSetWindowTitle(window, title.c_str());
-    }
+Window::~Window() {
+    shutdownImGui();
+    shutdownGLFW();    
+}
 
-    void Window::setSize(int w, int h) {
-        width = w;
-        height = h;
-        glfwSetWindowSize(window, width, height);
-    }
+void Window::setTitle(std::string title) {
+    glfwSetWindowTitle(window, title.c_str());
+}
 
-    void Window::setPos(int x, int y) {
-        glfwSetWindowPos(window, x, y);
-    }
+void Window::setSize(int w, int h) {
+    width = w;
+    height = h;
+    glfwSetWindowSize(window, width, height);
+}
 
-    void Window::getSize(int& w, int& h) {
-        w = width;
-        h = height;
-    }
+void Window::setPos(int x, int y) {
+    glfwSetWindowPos(window, x, y);
+}
 
-    void Window::getPos(int& x, int& y) {
-        glfwGetWindowPos(window, &x, &y);
-    }
+void Window::getSize(int& w, int& h) {
+    w = width;
+    h = height;
+}
 
-    bool Window::newFrame() {
-        glfwPollEvents();
-        if (glfwWindowShouldClose(window)) { return true; }
+void Window::getPos(int& x, int& y) {
+    glfwGetWindowPos(window, &x, &y);
+}
 
-        glfwGetWindowSize(window, &width, &height);
+bool Window::newFrame() {
+    glfwPollEvents();
+    if (glfwWindowShouldClose(window)) { return true; }
 
-        ImGui_ImplOpenGL3_NewFrame();
-        ImGui_ImplGlfw_NewFrame();
-        ImGui::NewFrame();
+    glfwGetWindowSize(window, &width, &height);
 
-        ImGui::Begin("Main", NULL, WINDOW_FLAGS);
-        ImGui::SetWindowPos(ImVec2(0, 0));
-        ImGui::SetWindowSize(ImVec2(width, height));
+    ImGui_ImplOpenGL3_NewFrame();
+    ImGui_ImplGlfw_NewFrame();
+    ImGui::NewFrame();
 
-        return false;
-    }
+    ImGui::Begin("Main", NULL, WINDOW_FLAGS);
+    ImGui::SetWindowPos(ImVec2(0, 0));
+    ImGui::SetWindowSize(ImVec2(width, height));
 
-    void Window::render() {
-        ImGui::End();
-        ImGui::Render();
-        auto io = ImGui::GetIO();
-        glViewport(0, 0, (int)io.DisplaySize.x, (int)io.DisplaySize.y);
-        glClearColor(0, 0, 0, 1);
-        glClear(GL_COLOR_BUFFER_BIT);
-        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-        glfwSwapBuffers(window);
-    }
+    return false;
+}
 
-    void Window::setupGLFW(std::string title) {
-        glfwSetErrorCallback(glfwErrorCallback);
-        if (!glfwInit()) throw std::runtime_error("Failed to initialize GLFW");
+void Window::render() {
+    ImGui::End();
+    ImGui::Render();
+    auto io = ImGui::GetIO();
+    glViewport(0, 0, (int)io.DisplaySize.x, (int)io.DisplaySize.y);
+    glClearColor(0, 0, 0, 1);
+    glClear(GL_COLOR_BUFFER_BIT);
+    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+    glfwSwapBuffers(window);
+}
 
-        // Decide GL+GLSL versions
-    #if defined(IMGUI_IMPL_OPENGL_ES2)
-        // GL ES 2.0 + GLSL 100
-        glslVersion = "#version 100";
-        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 2);
-        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
-        glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_ES_API);
-    #elif defined(__APPLE__)
-        // GL 3.2 + GLSL 150
-        glslVersion = "#version 150";
-        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
-        glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);  // 3.2+ only
-        glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);            // Required on Mac
-    #else
-        // GL 3.0 + GLSL 130
-        glslVersion = "#version 130";
-        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
-        //glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);  // 3.2+ only
-        //glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);            // 3.0+ only
-    #endif
+void Window::setupGLFW(std::string title) {
+    glfwSetErrorCallback(glfwErrorCallback);
+    if (!glfwInit()) throw std::runtime_error("Failed to initialize GLFW");
 
-        // Create window with graphics context
-        window = glfwCreateWindow(1280, 720, "Dear ImGui GLFW+OpenGL3 example", NULL, NULL);
-        if (window == NULL) throw std::runtime_error("Could not create window");
-        glfwMakeContextCurrent(window);
-        gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
-        glfwSwapInterval(1); // Enable vsync
-    }
+    // Decide GL+GLSL versions
+#if defined(IMGUI_IMPL_OPENGL_ES2)
+    // GL ES 2.0 + GLSL 100
+    glslVersion = "#version 100";
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 2);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
+    glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_ES_API);
+#elif defined(__APPLE__)
+    // GL 3.2 + GLSL 150
+    glslVersion = "#version 150";
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);  // 3.2+ only
+    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);            // Required on Mac
+#else
+    // GL 3.0 + GLSL 130
+    glslVersion = "#version 130";
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
+    //glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);  // 3.2+ only
+    //glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);            // 3.0+ only
+#endif
 
-    void Window::setupImGui() {
-        // Setup Dear ImGui context
-        IMGUI_CHECKVERSION();
-        ImGui::CreateContext();
+    // Create window with graphics context
+    window = glfwCreateWindow(1280, 720, "Dear ImGui GLFW+OpenGL3 example", NULL, NULL);
+    if (window == NULL) throw std::runtime_error("Could not create window");
+    glfwMakeContextCurrent(window);
+    gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
+    glfwSwapInterval(1); // Enable vsync
+}
 
-        // Setup Dear ImGui style
-        ImGui::StyleColorsDark();
+void Window::setupImGui() {
+    // Setup Dear ImGui context
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
 
-        // Setup Platform/Renderer backends
-        ImGui_ImplGlfw_InitForOpenGL(window, true);
-        ImGui_ImplOpenGL3_Init(glslVersion);
-    }
+    // Setup Dear ImGui style
+    ImGui::StyleColorsDark();
 
-    void Window::shutdownImGui() {
-        ImGui_ImplOpenGL3_Shutdown();
-        ImGui_ImplGlfw_Shutdown();
-        ImGui::DestroyContext();
-    }
+    // Setup Platform/Renderer backends
+    ImGui_ImplGlfw_InitForOpenGL(window, true);
+    ImGui_ImplOpenGL3_Init(glslVersion);
+}
 
-    void Window::shutdownGLFW() {
-        glfwDestroyWindow(window);
-        glfwTerminate();
-    }
+void Window::shutdownImGui() {
+    ImGui_ImplOpenGL3_Shutdown();
+    ImGui_ImplGlfw_Shutdown();
+    ImGui::DestroyContext();
+}
 
-    void Window::glfwErrorCallback(int error, const char* description) {
-        spdlog::error("[GLFW {0}] {1}", error, description);
-    }
+void Window::shutdownGLFW() {
+    glfwDestroyWindow(window);
+    glfwTerminate();
+}
+
+void Window::glfwErrorCallback(int error, const char* description) {
+    spdlog::error("[GLFW {0}] {1}", error, description);
 }
