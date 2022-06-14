@@ -97,7 +97,7 @@ void Window::setupGLFW(std::string title) {
 #endif
 
     // Create window with graphics context
-    window = glfwCreateWindow(1280, 720, "Dear ImGui GLFW+OpenGL3 example", NULL, NULL);
+    window = glfwCreateWindow(1280, 720, title.c_str(), NULL, NULL);
     if (window == NULL) throw std::runtime_error("Could not create window");
     glfwMakeContextCurrent(window);
     gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);

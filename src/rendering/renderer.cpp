@@ -2,7 +2,9 @@
 
 #include "shader.h"
 #define STB_TRUETYPE_IMPLEMENTATION
-#include "../imgui/imstb_truetype.h"
+#include "imgui/imstb_truetype.h"
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+#include "stb_image_write.h"
 
 #include <iostream>
 #include <stdexcept>
@@ -11,7 +13,7 @@
 using namespace muon::rendering;
 
 TextRenderer::TextRenderer()
-    : ttfFontLocation("../res/DejaVu Sans Mono.ttf") {
+    : ttfFontLocation("../res/Go Mono.ttf") {
 
     FILE* f = fopen(ttfFontLocation.c_str(), "rb");
     if (!f) throw std::runtime_error("Cannot Open Font File");
@@ -36,13 +38,15 @@ TextRenderer::TextRenderer()
     mGlyphScale = 1;
 
     if (font.numGlyphs == 0) throw std::runtime_error("Font file error");
+    std::cout << font.numGlyphs << " Glyphs Loaded" << std::endl;
 
     // ok poggers that's the font loaded
     // and now we extract SDF glyphs
-    for (int i = 0; i < 255; i++) {
+    for (int i = 0; i < 68; i++) {
         FontChar fc;
         
         int xoffset, yoffset;
+        std::cout << i << std::endl;
         fc.data = stbtt_GetCodepointSDF(
             &font,
             mGlyphScale,
@@ -62,6 +66,9 @@ TextRenderer::TextRenderer()
         mFdata[i] = fc;
     }
 
+
+
+
     // OK that's pog
     // now we can make opengl textures
     // from the SDF glyphs
@@ -70,7 +77,7 @@ TextRenderer::TextRenderer()
     // far more memory efficient for grayscale
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
-    for (int i = 0; i < 255; i++) {
+    for (int i = 0; i < 68; i++) {
         GLuint texID;
         FontChar* currentChar = &mFdata[i];
         glGenTextures(1, &texID);
