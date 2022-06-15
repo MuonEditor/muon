@@ -5,7 +5,7 @@ file(GLOB_RECURSE SRC "src/*.cpp" "src/*.c")
 
 add_executable(muon ${SRC})
 target_include_directories(muon PRIVATE "src/")
-target_include_directories(muon PRIVATE "src/imgui")
+target_include_directories(muon PRIVATE "src/thirdparty")
 
 # Compiler arguments
 if (WIN32)

@@ -42,7 +42,7 @@ TextRenderer::TextRenderer()
 
     // ok poggers that's the font loaded
     // and now we extract SDF glyphs
-    for (int i = 0; i < 68; i++) {
+    for (int i = 67; i < 69; i++) {
         FontChar fc;
         
         int xoffset, yoffset;
@@ -66,8 +66,8 @@ TextRenderer::TextRenderer()
         mFdata[i] = fc;
     }
 
-
-
+    FontChar fc = mFdata[1];
+    stbi_write_png("image.png", fc.w, fc.h, 1, fc.data, fc.w * sizeof(uint8_t));
 
     // OK that's pog
     // now we can make opengl textures
