@@ -19,6 +19,7 @@ Muon::Muon(int argc, char** argv) {
 
     // Create window
     win = new Window("Muon v" MUON_VERSION, 1280, 720);
+    // win = new Window("Muon v" MUON_VERSION, 3840, 2160);
 }
 
 int Muon::run() {
@@ -34,7 +35,7 @@ int Muon::run() {
         //     ImGui::ShowDemoWindow();
         // }
 
-        textRenderer.putChar('H', 0, 0, {1.0f, 1.0f, 1.0f, 1.0f});
+        textRenderer.putStr("We do a little rendering", -1, -1, {1.0f, 1.0f, 1.0f, 1.0f});
 
         // check err
         GLenum err;

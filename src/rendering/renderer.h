@@ -12,9 +12,7 @@ class Shader;
 struct FontChar {
     GLuint glTex;
     float advance;
-    int8_t xoff;
-    int8_t yoff;
-    int w,h;
+    int w,h, xoff, yoff;
     uint8_t* data;
 };
 
@@ -32,16 +30,16 @@ public:
     ~TextRenderer();
 
     void writeString();
-    void putChar(char character, int x, int y, const glm::vec4& col);
+    void putStr(std::string string, int x, int y, const glm::vec4& col);
 
     std::string ttfFontLocation;
 
 private:
-    FontChar mFdata[255];
+    std::unordered_map<char, FontChar> mFdata;
     
-    int mGlyphScale;
-    const int mSDFRes = 64;
-    const int mPixelDist = 64;
+    float mGlyphScale;
+    const float mSDFRes = 128.0f;
+    const int mPixelDist = 92.0f;
 
 private:
     Shader* mFontShader;

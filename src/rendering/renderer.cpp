@@ -13,7 +13,7 @@
 using namespace muon::rendering;
 
 TextRenderer::TextRenderer()
-    : ttfFontLocation("../res/Go Mono.ttf") {
+    : ttfFontLocation("../res/DejaVu Sans Mono.ttf") {
 
     FILE* f = fopen(ttfFontLocation.c_str(), "rb");
     if (!f) throw std::runtime_error("Cannot Open Font File");
@@ -35,18 +35,17 @@ TextRenderer::TextRenderer()
     stbtt_InitFont(&font, buffer, 0);
 
     mGlyphScale = stbtt_ScaleForPixelHeight(&font, mSDFRes);
-    mGlyphScale = 1;
 
     if (font.numGlyphs == 0) throw std::runtime_error("Font file error");
-    std::cout << font.numGlyphs << " Glyphs Loaded" << std::endl;
+    std::cout << font.numGlyphs << " Glyphs Loaded (Scale: " << mGlyphScale << ")" << std::endl;
 
     // ok poggers that's the font loaded
     // and now we extract SDF glyphs
-    for (int i = 67; i < 69; i++) {
+    // WE ONLY WANT RENDERABLE CHARACTERS!
+    for (int i = 33; i < 127; i++) {
         FontChar fc;
         
         int xoffset, yoffset;
-        std::cout << i << std::endl;
         fc.data = stbtt_GetCodepointSDF(
             &font,
             mGlyphScale,
@@ -64,10 +63,13 @@ TextRenderer::TextRenderer()
 
         fc.advance = advance * mGlyphScale;
         mFdata[i] = fc;
+
+        // std::string s;
+        // s += (char)i;
+        // s += ".png";
+        // stbi_write_png(s.c_str(), fc.w, fc.h, 1, fc.data, fc.w * sizeof(uint8_t));
     }
 
-    FontChar fc = mFdata[1];
-    stbi_write_png("image.png", fc.w, fc.h, 1, fc.data, fc.w * sizeof(uint8_t));
 
     // OK that's pog
     // now we can make opengl textures
@@ -77,19 +79,17 @@ TextRenderer::TextRenderer()
     // far more memory efficient for grayscale
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
-    for (int i = 0; i < 68; i++) {
-        GLuint texID;
-        FontChar* currentChar = &mFdata[i];
-        glGenTextures(1, &texID);
-        glBindTexture(GL_TEXTURE_2D, texID);
+    for (auto& ch : mFdata) {
+        glGenTextures(1, &ch.second.glTex);
+        glBindTexture(GL_TEXTURE_2D, ch.second.glTex);
         // we use only the red channel because we are storing
         // grayscale so we can pack into less bytes
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, mFdata->w, mFdata->h, 0, GL_RED, GL_UNSIGNED_BYTE, mFdata->data);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, ch.second.w, ch.second.h, 0, GL_RED, GL_UNSIGNED_BYTE, ch.second.data);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        currentChar->glTex = texID;
+        std::cout << ch.second.glTex << std::endl;
     }
 
     // Ok EPIC, now shader
@@ -112,37 +112,47 @@ TextRenderer::TextRenderer()
 }
 
 // we do NOT want to compute this every frame
-void TextRenderer::putChar(char character, int x, int y, const glm::vec4& col) {
+void TextRenderer::putStr(std::string string, int x, int y, const glm::vec4& col) {
     mFontShader->use();
 
     glUniform4f(glGetUniformLocation(mFontShader->program, "glyphCol"), col.r, col.g, col.b, col.a);
     glActiveTexture(GL_TEXTURE0);
     glBindVertexArray(mVAO);
 
-    FontChar* ch = &mFdata[character];
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    float xpos = x * mGlyphScale;
-    float ypos = y * mGlyphScale;
+    float xAdvance = 0;
 
-    float w = ch->w * mGlyphScale;
-    float h = ch->h * mGlyphScale;
+    for (const char& character : string) {
+        FontChar* ch = &mFdata[character];
 
-    float vertices[6][4] = {
-        { xpos,     ypos + h,   0.0f, 0.0f },
-        { xpos,     ypos,       0.0f, 1.0f },
-        { xpos + w, ypos,       1.0f, 1.0f },
+        xAdvance += (static_cast<float>(ch->advance) * 0.007);
+        if (character == ' ') continue;
 
-        { xpos,     ypos + h,   0.0f, 0.0f },
-        { xpos + w, ypos,       1.0f, 1.0f },
-        { xpos + w, ypos + h,   1.0f, 0.0f }
-    };
+        float xpos = static_cast<float>(x) * mGlyphScale + xAdvance;
+        float ypos = static_cast<float>(y) * mGlyphScale;
 
-    glBindTexture(GL_TEXTURE_2D, ch->glTex);
+        float w = static_cast<float>(ch->w) * mGlyphScale * 0.1;
+        float h = static_cast<float>(ch->h) * mGlyphScale * 0.1;
 
-    glBindBuffer(GL_ARRAY_BUFFER, mVBO);
-    glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glDrawArrays(GL_TRIANGLES, 0, 6);
+        float vertices[6][4] = {
+            { xpos,     ypos + h,   0.0f, 0.0f },
+            { xpos,     ypos,       0.0f, 1.0f },
+            { xpos + w, ypos,       1.0f, 1.0f },
+
+            { xpos,     ypos + h,   0.0f, 0.0f },
+            { xpos + w, ypos,       1.0f, 1.0f },
+            { xpos + w, ypos + h,   1.0f, 0.0f }
+        };
+
+        glBindTexture(GL_TEXTURE_2D, ch->glTex);
+
+        glBindBuffer(GL_ARRAY_BUFFER, mVBO);
+        glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices);
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+        glDrawArrays(GL_TRIANGLES, 0, 6);
+    }
 
     glBindVertexArray(0);
     glBindTexture(GL_TEXTURE_2D, 0);
