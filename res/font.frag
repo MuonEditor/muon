@@ -5,8 +5,9 @@ in vec2 fUV;
 uniform sampler2D tSDF;
 uniform vec4 glyphCol;
 
-const float smoothing = 0.1;
-const float buf = 0.1;
+// These should maybe be uniforms but for now
+const float smoothing = 0.05;
+const float buf = 0.2;
 
 out vec4 colour;
 

@@ -127,14 +127,14 @@ void TextRenderer::putStr(std::string string, int x, int y, const glm::vec4& col
     for (const char& character : string) {
         FontChar* ch = &mFdata[character];
 
-        xAdvance += (static_cast<float>(ch->advance) * 0.007);
+        xAdvance += (static_cast<float>(ch->advance) * 0.002);
         if (character == ' ') continue;
 
         float xpos = static_cast<float>(x) * mGlyphScale + xAdvance;
         float ypos = static_cast<float>(y) * mGlyphScale;
 
-        float w = static_cast<float>(ch->w) * mGlyphScale * 0.1;
-        float h = static_cast<float>(ch->h) * mGlyphScale * 0.1;
+        float w = static_cast<float>(ch->w) * mGlyphScale * 0.05;
+        float h = static_cast<float>(ch->h) * mGlyphScale * 0.05;
 
         float vertices[6][4] = {
             { xpos,     ypos + h,   0.0f, 0.0f },

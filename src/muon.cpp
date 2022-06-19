@@ -35,7 +35,7 @@ int Muon::run() {
         //     ImGui::ShowDemoWindow();
         // }
 
-        textRenderer.putStr("We do a little rendering", -1, -1, {1.0f, 1.0f, 1.0f, 1.0f});
+        textRenderer.putStr("We do a little rendering", -2, -1, {1.0f, 1.0f, 1.0f, 1.0f});
 
         // check err
         GLenum err;
