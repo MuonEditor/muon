@@ -4,8 +4,11 @@
 #include "spdlog/spdlog.h"
 #include "version.h"
 #include "rendering/renderer.h"
+#include "text/file_buffer.h"
 
 #include <iostream>
+#include <memory>
+#include <chrono>
 
 namespace muon {
 
@@ -15,7 +18,7 @@ Muon::Muon(int argc, char** argv) {
     if (args.parse(argc, argv)) { throw std::runtime_error("Failed to parse arguments"); }
 
     // MOTD
-    spdlog::info("- Muon Editor v" MUON_VERSION " -");
+    spdlog::info("- Muon Editor v" MUON_VERSION);
 
     // Create window
     win = new Window("Muon v" MUON_VERSION, 1280, 720);
@@ -23,19 +26,20 @@ Muon::Muon(int argc, char** argv) {
 }
 
 int Muon::run() {
-    bool demo = false;
+    muon::_FileBuffer fileBuffer("../src/text/file_buffer.h");
 
     rendering::TextRenderer textRenderer;
 
     while (true) {
         if (win->newFrame()) { break; }
 
+        // static bool demo = false;
         // ImGui::Checkbox("ImGui Demo", &demo);
         // if (demo) {
         //     ImGui::ShowDemoWindow();
         // }
 
-        textRenderer.putStr("We do a little rendering", -2, -1, {1.0f, 1.0f, 1.0f, 1.0f});
+        // textRenderer.putStr("We do a little rendering", -2, -1, {1.0f, 1.0f, 1.0f, 1.0f});
 
         // check err
         GLenum err;

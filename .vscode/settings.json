@@ -87,5 +87,5 @@
         "variant": "cpp",
         "glad.h": "c"
     },
-    "cmake.configureOnOpen": false
+    "cmake.configureOnOpen": false,
 }

@@ -1,10 +1,13 @@
 #pragma once
+
 #include "text_buffer.h"
+
 #include <fstream>
 
 namespace muon {
     class _FileBufferTreeNode;
     typedef std::shared_ptr<_FileBufferTreeNode> FileBufferTreeNode;
+
     class _FileBufferTreeNode {
     public:
         //size_t offset;

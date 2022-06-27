@@ -19,16 +19,13 @@ Shader::Shader() {
 	mVert = 0;
 }
 
-
-void Shader::load(std::string path)
-{
+void Shader::load(std::string path) {
 	std::string vertexLocation = path + ".vert";
 	load(vertexLocation, GL_VERTEX_SHADER);
 
 	std::string fragmentLocation = path + ".frag";
 	load(fragmentLocation, GL_FRAGMENT_SHADER);
 }
-
 
 void Shader::load(std::string path, GLenum type) {
 	GLuint activeShader = 0;
@@ -76,7 +73,6 @@ void Shader::use() {
 	glUseProgram(program);
 }
 
-
 bool Shader::mCheckShader(GLuint uid) {
 	GLint isCompiled = 0;
 	glGetShaderiv(uid, GL_COMPILE_STATUS, &isCompiled);
@@ -98,7 +94,6 @@ bool Shader::mCheckShader(GLuint uid) {
 
 	return true;
 }
-
 
 Shader::~Shader() {
 	glDeleteProgram(program);

@@ -1,4 +1,5 @@
 #pragma once
+
 #include <vector>
 #include <string>
 #include <memory>
@@ -42,6 +43,7 @@ namespace muon {
     
     class _TextBuffer;
     typedef std::shared_ptr<_TextBuffer> TextBuffer;
+    
     class _TextBuffer {
     public:
         virtual ~_TextBuffer() {}
