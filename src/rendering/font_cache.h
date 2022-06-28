@@ -38,7 +38,7 @@ typedef std::shared_ptr<_FontEntry> FontEntry;
 // font is called to be loaded, and a cross refference will
 // take place to load the minimum visible charset
 //
-// visible char set is 32-255
+// visible char set is 32-128
 class FontCache {
 public:
     FontCache();
@@ -56,8 +56,14 @@ public:
     FontChar getFontChar(uint8_t font, char character);
 
 private:
+    struct mCacheHit {
+        std::filesystem::path location;
+        std::string font;
+        char glyph;
+    };
+
     // exclude is if cache is incomplete, only load non excluded
-    void mLoadBasicCharset(FontEntry font, std::vector<char> exclude);
+    void mLoadBasicCharset(FontEntry font, std::vector<mCacheHit> exclude);
     // for individual, say a user typed an emoji, it is loaded
     // then cached, then a texture is allocated for it
     // UTF-8 SOON
@@ -67,11 +73,6 @@ private:
     std::unordered_map<uint8_t, FontEntry> mFonts;
     uint8_t mNextFontID = 0;
 
-    struct mCacheHit {
-        std::filesystem::path location;
-        std::string font;
-        char glyph;
-    };
     // disk cache information
     void mInitFSCache();
     std::vector<mCacheHit> mCacheCheck(std::string name);

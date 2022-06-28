@@ -75,25 +75,43 @@ uint8_t FontCache::registerFont(std::string ttfLocation) {
     }
 
     // build exclude list
-    std::vector<char> excludeList;
+    std::vector<mCacheHit> excludeList;
     for (const auto& hit : cacheHits) {
-        excludeList.push_back(hit.glyph);
+        excludeList.push_back(hit);
     }
 
     this->mLoadBasicCharset(font, excludeList);
     return mNextFontID++;
 }
 
-void FontCache::mLoadBasicCharset(FontEntry font, std::vector<char> exclude) {
+void FontCache::mLoadBasicCharset(FontEntry font, std::vector<mCacheHit> exclude) {
     // WE ONLY WANT RENDERABLE CHARACTERS
-    for (int i = 33; i < 255; i++) {
+    for (int i = 33; i < 128; i++) {
+        // TODO: This doesn't do what i expect
+        int isGlyphEmpty = stbtt_IsGlyphEmpty(&font->info, i);
+        if (isGlyphEmpty != 0) { 
+            continue;
+        }
+
         FontChar fc = FontChar(new _FontChar);
 
-        if (std::find(exclude.begin(), exclude.end(), static_cast<char>(i)) != exclude.end()) {
+        // modern C++ moment
+        auto it = std::find_if(exclude.begin(), exclude.end(), [&i](const mCacheHit& obj) {return obj.glyph == i;});
+        if (it != exclude.end()) {
+            auto hitIndex = std::distance(exclude.begin(), it);
+
             // we are processing a cached SDF here
+            std::string lookPath = exclude[hitIndex].location;
+            // add to read queue
+            fc->imgData = static_cast<uint8_t*>(stbi_load(lookPath.c_str(), &fc->w, &fc->h, nullptr, 1));
 
             // we want to load the cached font and use stbtt_GetFontBoundingBox to get glyph metadata
+            stbtt_GetFontBoundingBox(&font->info, &fc->w, &fc->h, &fc->xoff, &fc->yoff);
+            int advance;
+            stbtt_GetCodepointHMetrics(&font->info, i, &advance, NULL);
+            fc->advance = advance * mGlyphScale;
 
+            font->loadedCharset[static_cast<char>(i)] = fc;
             continue;
         }
 
@@ -105,6 +123,7 @@ void FontCache::mLoadBasicCharset(FontEntry font, std::vector<char> exclude) {
 
         font->loadedCharset[static_cast<char>(i)] = fc;
 
+        // add to write queue
         std::string s = font->name + "_"  + std::to_string(i) + ".png";
         std::filesystem::path cacheLocation = mCacheLocation;
         cacheLocation += s;
