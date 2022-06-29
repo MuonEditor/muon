@@ -45,17 +45,16 @@ public:
     FontCache(std::string cacheLocation);
     ~FontCache();
 
-    // Why would you need more than 255 fonts?
-    uint8_t registerFont(std::string ttfLocation);
+    FontEntry registerFont(std::string ttfLocation);
 
     std::filesystem::path defaultFont{ "DejaVu Sans Mono.ttf" };
     
-    uint8_t getFontByName(std::string name);
+    FontEntry getFontByName(std::string name);
     std::vector<std::string> getFonts();
 
     FontChar getFontChar(uint8_t font, char character);
 
-private:
+private: // Internal loading
     struct mCacheHit {
         std::filesystem::path location;
         std::string font;
@@ -67,11 +66,15 @@ private:
     // for individual, say a user typed an emoji, it is loaded
     // then cached, then a texture is allocated for it
     // UTF-8 SOON
-    void mLoadFurtherChar(uint8_t font, char ch);
+    void mLoadFurtherChar(FontEntry font, char ch);
 
-private:
-    std::unordered_map<uint8_t, FontEntry> mFonts;
-    uint8_t mNextFontID = 0;
+private: // GPU
+    // Each font has a 
+    void mCreateAtlasFromBasic(FontEntry font);
+    void mAddGlpyhtoAtlas(FontEntry font, char ch);
+
+private: // Cacheing
+    std::vector<FontEntry> mFonts;
 
     // disk cache information
     void mInitFSCache();

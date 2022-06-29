@@ -1,6 +1,5 @@
 #include "renderer.h"
 
-#include "shader.h"
 #define STB_TRUETYPE_IMPLEMENTATION
 #include "imgui/imstb_truetype.h"
 
@@ -8,8 +7,8 @@
 
 using namespace muon::rendering;
 
-TextRenderer::TextRenderer() 
-    : mCache() {
+TextRenderer::TextRenderer(FontCache cache)
+    : mCache(cache) {
 
 
 

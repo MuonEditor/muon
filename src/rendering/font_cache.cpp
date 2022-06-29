@@ -43,7 +43,7 @@ FontCache::~FontCache() {
     // also stbtt_fontinfo has some data that needs to be cleared
 }
 
-uint8_t FontCache::registerFont(std::string ttfLocation) {
+FontEntry FontCache::registerFont(std::string ttfLocation) {
     std::filesystem::path location = mResourcesLocation;
     location += std::filesystem::path{ttfLocation};
 
@@ -61,6 +61,7 @@ uint8_t FontCache::registerFont(std::string ttfLocation) {
     stbtt_InitFont(&font->info, fontBuffer, 0);
     if (font->info.numGlyphs == 0) throw std::runtime_error("Font file error");
 
+    mFonts.push_back(font);
     mGlyphScale = stbtt_ScaleForPixelHeight(&font->info, mSDFRes);
     std::cout << font->info.numGlyphs << " Glyphs Registered (Scale: " << mGlyphScale << ")" << std::endl;
 
@@ -71,7 +72,7 @@ uint8_t FontCache::registerFont(std::string ttfLocation) {
     // font is not in cache, load range
     if (cacheHits.size() == 0) {
         this->mLoadBasicCharset(font, {});
-        return mNextFontID++;
+        return font;
     }
 
     // build exclude list
@@ -81,12 +82,12 @@ uint8_t FontCache::registerFont(std::string ttfLocation) {
     }
 
     this->mLoadBasicCharset(font, excludeList);
-    return mNextFontID++;
+    return font;
 }
 
 void FontCache::mLoadBasicCharset(FontEntry font, std::vector<mCacheHit> exclude) {
     // WE ONLY WANT RENDERABLE CHARACTERS
-    for (int i = 33; i < 128; i++) {
+    for (int i = 33; i < 127; i++) {
         // TODO: This doesn't do what i expect
         int isGlyphEmpty = stbtt_IsGlyphEmpty(&font->info, i);
         if (isGlyphEmpty != 0) { 
@@ -105,8 +106,9 @@ void FontCache::mLoadBasicCharset(FontEntry font, std::vector<mCacheHit> exclude
             // add to read queue
             fc->imgData = static_cast<uint8_t*>(stbi_load(lookPath.c_str(), &fc->w, &fc->h, nullptr, 1));
 
-            // we want to load the cached font and use stbtt_GetFontBoundingBox to get glyph metadata
-            stbtt_GetFontBoundingBox(&font->info, &fc->w, &fc->h, &fc->xoff, &fc->yoff);
+            // we want to load the cached font and use stbtt_GetCodepointBox to get glyph metadata
+            // stbtt_GetCodepoint()
+            stbtt_GetCodepointBox(&font->info, i, &fc->w, &fc->h, &fc->xoff, &fc->yoff);
             int advance;
             stbtt_GetCodepointHMetrics(&font->info, i, &advance, NULL);
             fc->advance = advance * mGlyphScale;
@@ -129,9 +131,19 @@ void FontCache::mLoadBasicCharset(FontEntry font, std::vector<mCacheHit> exclude
         cacheLocation += s;
         stbi_write_png(cacheLocation.c_str(), fc->w, fc->h, 1, fc->imgData, fc->w * sizeof(uint8_t));
     }
+
+    this->mCreateAtlasFromBasic(font);
 }
 
-void FontCache::mLoadFurtherChar(uint8_t font, char ch) {
+void FontCache::mLoadFurtherChar(FontEntry font, char ch) {
+
+}
+
+void FontCache::mCreateAtlasFromBasic(FontEntry font) {
+    // Loop over all chars and get the x,y,w,h
+}
+
+void FontCache::mAddGlpyhtoAtlas(FontEntry font, char ch) {
 
 }
 
@@ -166,7 +178,7 @@ std::vector<FontCache::mCacheHit> FontCache::mCacheCheck(std::string name) {
         std::string glyph = cacheEntryLocation.substr(cacheEntryLocation.find('_')+1, cacheEntryLocation.length());
         if (font == name) {
             ret.push_back({
-                cacheEntry,
+                cacheEntry,z
                 font,
                 static_cast<char>(std::atoi(glyph.c_str()))
             });

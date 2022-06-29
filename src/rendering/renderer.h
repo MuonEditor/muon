@@ -1,6 +1,7 @@
 #pragma once
 
 #include "gl.h"
+#include "shader.h"
 #include "font_cache.h"
 #include "text/text_buffer.h"
 
@@ -9,20 +10,20 @@
 
 namespace muon::rendering {
 
-class Shader;
-
 class TextRenderer {
 public:
-    TextRenderer();
-    TextRenderer(TextBuffer buffer);
+    TextRenderer(FontCache cache);
     ~TextRenderer();
+
+    void renderBuffer(TextBuffer buffer);
+
 
 private:
     FontCache mCache;
 
 private:
     // rendering information
-    std::shared_ptr<Shader> mFontShader;
+    Shader mFontShader;
 };
 
 class RenderCompositor {

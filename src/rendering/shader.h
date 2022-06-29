@@ -3,13 +3,14 @@
 #include "../gl.h"
 
 #include <string>
+#include <memory>
 
 namespace muon::rendering {
 
-class Shader {
+class _Shader {
 public:
-	Shader();
-	~Shader();
+	_Shader();
+	~_Shader();
 
 	void load(std::string path);
 	void load(std::string path, GLenum type);
@@ -24,5 +25,6 @@ private:
 	GLuint mVert;
 	GLuint mFrag;
 };
+typedef std::shared_ptr<_Shader> Shader;
 
 }
