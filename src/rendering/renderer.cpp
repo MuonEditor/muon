@@ -7,10 +7,14 @@
 
 using namespace muon::rendering;
 
+TextRenderer::TextRenderer()
+    : mCache() {
+
+}
+
+
 TextRenderer::TextRenderer(FontCache cache)
     : mCache(cache) {
-
-
 
     // // OK that's pog
     // // now we can make opengl textures

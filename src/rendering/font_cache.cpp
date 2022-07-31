@@ -82,6 +82,11 @@ FontEntry FontCache::registerFont(std::string ttfLocation) {
     }
 
     this->mLoadBasicCharset(font, excludeList);
+
+    // int x, y, w, h;
+    // stbtt_GetFontBoundingBox(&font->info, &x, &y, &w, &h);
+    // std::cout << x << " " << y << " " << w << " " << h << std::endl;
+
     return font;
 }
 
@@ -96,7 +101,7 @@ void FontCache::mLoadBasicCharset(FontEntry font, std::vector<mCacheHit> exclude
 
         FontChar fc = FontChar(new _FontChar);
 
-        // modern C++ moment
+        // char is in the cache
         auto it = std::find_if(exclude.begin(), exclude.end(), [&i](const mCacheHit& obj) {return obj.glyph == i;});
         if (it != exclude.end()) {
             auto hitIndex = std::distance(exclude.begin(), it);
@@ -104,11 +109,9 @@ void FontCache::mLoadBasicCharset(FontEntry font, std::vector<mCacheHit> exclude
             // we are processing a cached SDF here
             std::string lookPath = exclude[hitIndex].location;
             // add to read queue
+            // we want to load the cached font and use stbtt_GetCodepointBox to get glyph metadata
             fc->imgData = static_cast<uint8_t*>(stbi_load(lookPath.c_str(), &fc->w, &fc->h, nullptr, 1));
 
-            // we want to load the cached font and use stbtt_GetCodepointBox to get glyph metadata
-            // stbtt_GetCodepoint()
-            stbtt_GetCodepointBox(&font->info, i, &fc->w, &fc->h, &fc->xoff, &fc->yoff);
             int advance;
             stbtt_GetCodepointHMetrics(&font->info, i, &advance, NULL);
             fc->advance = advance * mGlyphScale;
@@ -119,6 +122,7 @@ void FontCache::mLoadBasicCharset(FontEntry font, std::vector<mCacheHit> exclude
 
         // this char is not in the cache, load it and put it in the cache
         fc->imgData = stbtt_GetCodepointSDF(&font->info, mGlyphScale, i, 3, 128, mPixelDist, &fc->w, &fc->h, &fc->xoff, &fc->yoff);
+
         int advance;
         stbtt_GetCodepointHMetrics(&font->info, i, &advance, NULL);
         fc->advance = advance * mGlyphScale;
@@ -135,14 +139,20 @@ void FontCache::mLoadBasicCharset(FontEntry font, std::vector<mCacheHit> exclude
     this->mCreateAtlasFromBasic(font);
 }
 
+// TODO: This should be called when loading basic
 void FontCache::mLoadFurtherChar(FontEntry font, char ch) {
 
 }
 
 void FontCache::mCreateAtlasFromBasic(FontEntry font) {
     // Loop over all chars and get the x,y,w,h
+    for (const auto& [index, fontChar] : font->loadedCharset) {
+        std::cout << index << " " << fontChar->w << " " << fontChar->h << " " << fontChar->xoff << " " << fontChar->yoff << std::endl;
+    }
+
 }
 
+// TODO: This should be called when loading basic
 void FontCache::mAddGlpyhtoAtlas(FontEntry font, char ch) {
 
 }
@@ -178,7 +188,7 @@ std::vector<FontCache::mCacheHit> FontCache::mCacheCheck(std::string name) {
         std::string glyph = cacheEntryLocation.substr(cacheEntryLocation.find('_')+1, cacheEntryLocation.length());
         if (font == name) {
             ret.push_back({
-                cacheEntry,z
+                cacheEntry,
                 font,
                 static_cast<char>(std::atoi(glyph.c_str()))
             });

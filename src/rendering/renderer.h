@@ -12,6 +12,7 @@ namespace muon::rendering {
 
 class TextRenderer {
 public:
+    TextRenderer();
     TextRenderer(FontCache cache);
     ~TextRenderer();
 

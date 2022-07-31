@@ -12,8 +12,6 @@
 
 namespace muon::rendering {
 
-class Shader;
-
 struct _FontChar {
     GLuint glTex = 0;
     float advance;
@@ -94,3 +92,4 @@ private:
 };
 
 }
+class Shader;

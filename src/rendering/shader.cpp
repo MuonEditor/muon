@@ -13,13 +13,13 @@ std::string textFromFile(const std::string& path) {
 
 }
 
-Shader::Shader() {
+_Shader::_Shader() {
 	program = 0;
 	mFrag = 0;
 	mVert = 0;
 }
 
-void Shader::load(std::string path) {
+void _Shader::load(std::string path) {
 	std::string vertexLocation = path + ".vert";
 	load(vertexLocation, GL_VERTEX_SHADER);
 
@@ -27,7 +27,7 @@ void Shader::load(std::string path) {
 	load(fragmentLocation, GL_FRAGMENT_SHADER);
 }
 
-void Shader::load(std::string path, GLenum type) {
+void _Shader::load(std::string path, GLenum type) {
 	GLuint activeShader = 0;
 
 	if (type == GL_VERTEX_SHADER)
@@ -43,7 +43,7 @@ void Shader::load(std::string path, GLenum type) {
 	glShaderSource(activeShader, 1, &shaderSource, &shaderSourceLength);
 }
 
-void Shader::link() {
+void _Shader::link() {
 	if (mVert == 0 || mFrag == 0) {
 		return;
 	}
@@ -69,11 +69,11 @@ void Shader::link() {
 	glDeleteShader(mFrag);
 }
 
-void Shader::use() {
+void _Shader::use() {
 	glUseProgram(program);
 }
 
-bool Shader::mCheckShader(GLuint uid) {
+bool _Shader::mCheckShader(GLuint uid) {
 	GLint isCompiled = 0;
 	glGetShaderiv(uid, GL_COMPILE_STATUS, &isCompiled);
 	if(isCompiled == GL_FALSE)
@@ -95,7 +95,7 @@ bool Shader::mCheckShader(GLuint uid) {
 	return true;
 }
 
-Shader::~Shader() {
+_Shader::~_Shader() {
 	glDeleteProgram(program);
 	glDeleteShader(mVert);
 	glDeleteShader(mFrag);

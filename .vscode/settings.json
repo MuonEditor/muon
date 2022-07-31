@@ -85,7 +85,8 @@
         "semaphore": "cpp",
         "cinttypes": "cpp",
         "variant": "cpp",
-        "glad.h": "c"
+        "glad.h": "c",
+        "*.inc": "cpp"
     },
     "cmake.configureOnOpen": false,
 }
