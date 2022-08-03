@@ -13,17 +13,19 @@
 namespace muon::rendering {
 
 struct _FontChar {
-    GLuint glTex = 0;
     float advance;
     int w, h, xoff, yoff;
+    // TODO (Ben): We can free this after creating the tex
     uint8_t* imgData;
 };
 typedef std::shared_ptr<_FontChar> FontChar;
 
 struct _FontEntry {
     std::filesystem::path location;
+    GLuint glTex = 0;
     std::string name;
     stbtt_fontinfo info;
+    int loadedChars = 0;
     std::unordered_map<char, FontChar> loadedCharset;
 };
 typedef std::shared_ptr<_FontEntry> FontEntry;
@@ -37,6 +39,9 @@ typedef std::shared_ptr<_FontEntry> FontEntry;
 // take place to load the minimum visible charset
 //
 // visible char set is 32-128
+//
+// TODO (Ben): It is best to seperate the GPU code and the
+// cache / tt code in classes, perhaps font_renderable
 class FontCache {
 public:
     FontCache();

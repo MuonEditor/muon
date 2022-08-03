@@ -10,6 +10,7 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
+// Modern C++ ?
 void readBytes(uint8_t** buffer, std::string loc) {
     FILE* f = fopen(loc.c_str(), "rb");
     assert(f);
@@ -83,17 +84,13 @@ FontEntry FontCache::registerFont(std::string ttfLocation) {
 
     this->mLoadBasicCharset(font, excludeList);
 
-    // int x, y, w, h;
-    // stbtt_GetFontBoundingBox(&font->info, &x, &y, &w, &h);
-    // std::cout << x << " " << y << " " << w << " " << h << std::endl;
-
     return font;
 }
 
+// TODO (Ben): This function is a little messy
 void FontCache::mLoadBasicCharset(FontEntry font, std::vector<mCacheHit> exclude) {
-    // WE ONLY WANT RENDERABLE CHARACTERS
     for (int i = 33; i < 127; i++) {
-        // TODO: This doesn't do what i expect
+        // TODO (Ben): This doesn't do what i expect
         int glyph = stbtt_FindGlyphIndex(&font->info, i);
 
         int isGlyphEmpty = stbtt_IsGlyphEmpty(&font->info, glyph);
@@ -115,6 +112,7 @@ void FontCache::mLoadBasicCharset(FontEntry font, std::vector<mCacheHit> exclude
             int cacheX, cacheY;
             fc->imgData = static_cast<uint8_t*>(stbi_load(lookPath.c_str(), &cacheX, &cacheY, NULL, 1));
 
+            // we want to load the metadata from the font, skipping the generation of the SDF
             int ix0, iy0, ix1, iy1;
             stbtt_GetGlyphBitmapBoxSubpixel(&font->info, glyph, mGlyphScale, mGlyphScale, 0.0f, 0.0f, &ix0, &iy0, &ix1, &iy1);
             ix0 -= mGlyphPadding;
@@ -134,19 +132,21 @@ void FontCache::mLoadBasicCharset(FontEntry font, std::vector<mCacheHit> exclude
             fc->advance = static_cast<float>(advance) * mGlyphScale;
 
             font->loadedCharset[static_cast<char>(i)] = fc;
+            font->loadedChars++;
             continue;
         }
 
-        // this char is not in the cache, load it and put it in the cache
+        // this char is not in the cache
         fc->imgData = stbtt_GetCodepointSDF(&font->info, mGlyphScale, i, 3, 128, mPixelDist, &fc->w, &fc->h, &fc->xoff, &fc->yoff);
 
         int advance;
         stbtt_GetCodepointHMetrics(&font->info, i, &advance, NULL);
-        fc->advance = advance * mGlyphScale;
+        fc->advance = static_cast<float>(advance) * mGlyphScale;
 
         font->loadedCharset[static_cast<char>(i)] = fc;
+        font->loadedChars++;
 
-        // add to write queue
+        // TOOD (Ben): add to write queue
         std::string s = font->name + "_"  + std::to_string(i) + ".png";
         std::filesystem::path cacheLocation = mCacheLocation;
         cacheLocation += s;
@@ -156,20 +156,61 @@ void FontCache::mLoadBasicCharset(FontEntry font, std::vector<mCacheHit> exclude
     this->mCreateAtlasFromBasic(font);
 }
 
-// TODO: This should be called when loading basic
+// TODO (Ben): This should be called when loading basic
 void FontCache::mLoadFurtherChar(FontEntry font, char ch) {
 
 }
 
 void FontCache::mCreateAtlasFromBasic(FontEntry font) {
-    // Loop over all chars and get the x,y,w,h
-    for (const auto& [index, fontChar] : font->loadedCharset) {
-        std::cout << index << " " << fontChar->w << " " << fontChar->h << " " << fontChar->xoff << " " << fontChar->yoff << std::endl;
+    // Loop over all chars and get the largest glyph w,h (and add 20px to each end)
+    // we do this so if a further char is loaded and it is marginaly bigger, the whole
+    // texture unit doesn't have to be resized
+
+    int w = 0;
+    int h = 0;
+    for (const auto& [index, fc] : font->loadedCharset) {
+        if (fc->w > w) w = fc->w;
+        if (fc->h > h) h = fc->h;
     }
 
+    w += 20; h += 20;
+
+    std::cout << "CHARACTERS LOADED " << font->loadedChars << std::endl;
+
+    const GLsizei glyphs = static_cast<GLsizei>(font->loadedChars);
+    const GLubyte* texels = (GLubyte*)malloc(w * h * glyphs * sizeof(GLubyte));
+    memset((void*)texels, 0, w * h * glyphs * sizeof(GLubyte));
+
+    std::cout << "ALLOCATED TEXELS " << w << "x" << h << std::endl;
+
+    for (const auto& [index, fc] : font->loadedCharset) {
+        // memcpy()
+        memcpy((void*)texels + (index * w * h), fc->imgData, fc->w * fc->h);
+    }
+
+    std::cout << "COPIED TEXELS" << std::endl;
+
+    glGenTextures(1, &font->glTex);
+	glBindTexture(GL_TEXTURE_2D_ARRAY, font->glTex);
+
+    // We only use one channel
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
+	glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RED, w, h, glyphs, 0, GL_RED, GL_UNSIGNED_BYTE, NULL);
+
+	glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, 0, w, h, glyphs, GL_RGBA, GL_UNSIGNED_BYTE, texels);
+
+	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+	glBindTexture(GL_TEXTURE_2D_ARRAY, 0);
+
+	free((void*)texels);
 }
 
-// TODO: This should be called when loading basic
 void FontCache::mAddGlpyhtoAtlas(FontEntry font, char ch) {
 
 }
