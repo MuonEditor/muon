@@ -88,7 +88,8 @@ private:
     // SDF information
     float mGlyphScale;
     const float mSDFRes = 128.0f;
-    const int mPixelDist = 64.0f;
+    const int mPixelDist = 64;
+    const int mGlyphPadding = 3;
 };
 
 }

@@ -94,7 +94,9 @@ void FontCache::mLoadBasicCharset(FontEntry font, std::vector<mCacheHit> exclude
     // WE ONLY WANT RENDERABLE CHARACTERS
     for (int i = 33; i < 127; i++) {
         // TODO: This doesn't do what i expect
-        int isGlyphEmpty = stbtt_IsGlyphEmpty(&font->info, i);
+        int glyph = stbtt_FindGlyphIndex(&font->info, i);
+
+        int isGlyphEmpty = stbtt_IsGlyphEmpty(&font->info, glyph);
         if (isGlyphEmpty != 0) { 
             continue;
         }
@@ -110,11 +112,26 @@ void FontCache::mLoadBasicCharset(FontEntry font, std::vector<mCacheHit> exclude
             std::string lookPath = exclude[hitIndex].location;
             // add to read queue
             // we want to load the cached font and use stbtt_GetCodepointBox to get glyph metadata
-            fc->imgData = static_cast<uint8_t*>(stbi_load(lookPath.c_str(), &fc->w, &fc->h, nullptr, 1));
+            int cacheX, cacheY;
+            fc->imgData = static_cast<uint8_t*>(stbi_load(lookPath.c_str(), &cacheX, &cacheY, NULL, 1));
+
+            int ix0, iy0, ix1, iy1;
+            stbtt_GetGlyphBitmapBoxSubpixel(&font->info, glyph, mGlyphScale, mGlyphScale, 0.0f, 0.0f, &ix0, &iy0, &ix1, &iy1);
+            ix0 -= mGlyphPadding;
+            iy0 -= mGlyphPadding;
+            ix1 += mGlyphPadding;
+            iy1 += mGlyphPadding;
+
+            fc->w = (ix1 - ix0);
+            fc->h = (iy1 - iy0);
+            fc->xoff = ix0;
+            fc->yoff = iy0;
+
+            assert((cacheX == fc->w) && (cacheY == fc->h));
 
             int advance;
             stbtt_GetCodepointHMetrics(&font->info, i, &advance, NULL);
-            fc->advance = advance * mGlyphScale;
+            fc->advance = static_cast<float>(advance) * mGlyphScale;
 
             font->loadedCharset[static_cast<char>(i)] = fc;
             continue;
