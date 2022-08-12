@@ -161,54 +161,36 @@ void FontCache::mLoadFurtherChar(FontEntry font, char ch) {
 
 }
 
+// Loop over all chars and get the largest glyph w,h (and add 10px to each end)
+// we do this so if a further char is loaded and it is marginaly bigger, the whole
+// texture unit doesn't have to be resized
 void FontCache::mCreateAtlasFromBasic(FontEntry font) {
-    // Loop over all chars and get the largest glyph w,h (and add 20px to each end)
-    // we do this so if a further char is loaded and it is marginaly bigger, the whole
-    // texture unit doesn't have to be resized
-
-    int w = 0;
-    int h = 0;
+    int w = 0; int h = 0;
     for (const auto& [index, fc] : font->loadedCharset) {
         if (fc->w > w) w = fc->w;
         if (fc->h > h) h = fc->h;
     }
 
-    w += 20; h += 20;
-
-    std::cout << "CHARACTERS LOADED " << font->loadedChars << std::endl;
+    w += 10; h += 10;
 
     const GLsizei glyphs = static_cast<GLsizei>(font->loadedChars);
-    const GLubyte* texels = (GLubyte*)malloc(w * h * glyphs * sizeof(GLubyte));
-    memset((void*)texels, 0, w * h * glyphs * sizeof(GLubyte));
+    std::vector<u_int32_t> nullData(w * h, 0);
 
-    std::cout << "ALLOCATED TEXELS " << w << "x" << h << std::endl;
-
-    for (const auto& [index, fc] : font->loadedCharset) {
-        // memcpy()
-        memcpy((void*)texels + (index * w * h), fc->imgData, fc->w * fc->h);
-    }
-
-    std::cout << "COPIED TEXELS" << std::endl;
-
+    glActiveTexture(GL_TEXTURE0);
     glGenTextures(1, &font->glTex);
 	glBindTexture(GL_TEXTURE_2D_ARRAY, font->glTex);
-
-    // We only use one channel
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+	glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_R8, w, h, glyphs, 0, GL_RED, GL_UNSIGNED_BYTE, NULL);
 
-	glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RED, w, h, glyphs, 0, GL_RED, GL_UNSIGNED_BYTE, NULL);
+    int i = 0;
+    for (const auto& [index, fc] : font->loadedCharset) {
+        glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, i, w, h, 1, GL_RED, GL_UNSIGNED_BYTE, &nullData[0]);
+        glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, i, fc->w, fc->h, 1, GL_RED, GL_UNSIGNED_BYTE, fc->imgData);
 
-	glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, 0, w, h, glyphs, GL_RGBA, GL_UNSIGNED_BYTE, texels);
+        i++;
+    }
 
-	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-
-	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-
-	glBindTexture(GL_TEXTURE_2D_ARRAY, 0);
-
-	free((void*)texels);
+	// glBindTexture(GL_TEXTURE_2D_ARRAY, 0);
 }
 
 void FontCache::mAddGlpyhtoAtlas(FontEntry font, char ch) {
@@ -240,7 +222,7 @@ void FontCache::mInitFSCache() {
 // all cache operations assume mInitFSCache has been called
 std::vector<FontCache::mCacheHit> FontCache::mCacheCheck(std::string name) {
     std::vector<mCacheHit> ret;
-    for (const auto cacheEntry : std::filesystem::directory_iterator(mCacheLocation)) {
+    for (const auto& cacheEntry : std::filesystem::directory_iterator(mCacheLocation)) {
         std::string cacheEntryLocation = cacheEntry.path().stem().string();
         std::string font = cacheEntryLocation.substr(0, cacheEntryLocation.find('_'));
         std::string glyph = cacheEntryLocation.substr(cacheEntryLocation.find('_')+1, cacheEntryLocation.length());

@@ -22,6 +22,8 @@ else()
     target_compile_options(muon PRIVATE -std=c++17)
     if (CMAKE_BUILD_TYPE MATCHES "Debug")
         target_compile_options(muon PRIVATE -O1)
+        target_compile_options(muon PRIVATE -Wall)
+        target_compile_options(muon PRIVATE -g)
     endif()
 endif()
 
