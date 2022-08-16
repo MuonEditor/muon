@@ -63,6 +63,7 @@ std::shared_ptr<_Shader> _Shader::load(std::filesystem::path path) {
 		if (type->def == "vertex") glType = GL_VERTEX_SHADER;
 		if (type->def == "geometry") glType = GL_GEOMETRY_SHADER;
 		if (type->def == "fragment") glType = GL_FRAGMENT_SHADER;
+
 		assert(glType != GL_NONE);
 
 		mShaders[Shader2Index[glType]] = glCreateShader(glType);
@@ -106,9 +107,11 @@ std::shared_ptr<_Shader> _Shader::unUse() {
 }
 
 void _Shader::addAttribute(const std::string& attribute) {
+	mAttributes[attribute] = glGetAttribLocation(mProgram, attribute.c_str());
 }
 
 void _Shader::addUniform(const std::string& uniform) {
+	mUniformLocations[uniform] = glGetUniformLocation(mProgram, uniform.c_str());
 }
 
 bool _Shader::mCheckShader(GLuint uid) {

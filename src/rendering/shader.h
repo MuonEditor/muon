@@ -25,8 +25,12 @@ public:
 
 	void addAttribute(const std::string& attribute);
 	void addUniform(const std::string& uniform);
-	GLuint operator[](const std::string& attribute);
-	GLuint operator()(const std::string& uniform);
+	GLuint operator[](const std::string& attribute) {
+		return mAttributes[attribute];
+	}
+	GLuint operator()(const std::string& uniform) {
+		return mUniformLocations[uniform];
+	}
 
 private:
 	GLuint mShaders[3];
